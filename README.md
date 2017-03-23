@@ -4,17 +4,17 @@ This is a vim plugin to center the current file in the terminal window by adding
 
 This is my first vim plugin and is still very much in development.
 
-## keybindings
+## suggested keybindings
 
-The default keybindings are meant to work in tandem with [vim-unimpaired](https://github.com/tpope/vim-unimpaired).
+These keybindings are meant to work in tandem with [vim-unimpaired](https://github.com/tpope/vim-unimpaired). Add them to your vimrc.
 
-`<leader>c` center the window with the default width of 80 characters
+`nnoremap <leader>C :call CenWinToggle(80)` center the window with the default width of 80 characters
 
-`<localleader>l` open the location list with an outline (functions)
+`nnoreamp <localleader>l :call CenWinOutlineEnable(0,1)` open the location list with an outline (functions)
 
-`<localleader>L` open the location list with an outline (double comment characters; will be deprecated in favour of a buffer-local switch between the two types of lists)
+`nnoremap <localleader>L :call CenWinOutlineEnable(0,2)` open the location list with an outline (double comment characters; will be deprecated in favour of a buffer-local switch between the two types of lists)
 
-`<localleader>q` open the todos as a quickfix window
+`nnoremap <localleader>q :call CenWinTodoToggle()` open the todos as a quickfix window
 
 ## todo window
 
