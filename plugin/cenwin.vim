@@ -103,8 +103,6 @@ function! CenWinEnable(...)
 
     exe "normal! \<C-w>o"
     let currentsplitrightvalue = &splitright
-    hi NonText ctermfg=8
-    hi VertSplit ctermfg=8
 
     " add left side pad pane and move focus back to center
     set nosplitright
@@ -398,9 +396,6 @@ function! CenWinDisable(...)
     if do == 1
         exe "buffer".g:CenWinStatus
         exe "normal! \<C-w>o"
-        "execute "colorscheme ".g:colors_name
-        hi nonText ctermfg=0
-        hi VertSplit ctermfg=10
         let g:CenWinStatus = 0
     endif
 endfunc
