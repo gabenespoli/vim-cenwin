@@ -24,7 +24,7 @@
 let g:CenWinStatus = 0 " buffer number of the centered window
 let g:CenWinLeftPad = 0 " buffer number of pad so it can be reused
 let g:CenWinRightPad = 0
-let g:CenWinWidth = 80
+let g:CenWinWidth = 100
 let g:CenWinLeftWidth = 0
 let g:CenWinRightWidth = 0
 let g:CenWinOutline = 0 " boolean
@@ -42,6 +42,14 @@ function! CenWinToggle(...)
         call CenWinEnable(opt)
     else
         call CenWinDisable(opt)
+    endif
+endfunc
+
+function! CenWinToggleWidth()
+    if g:CenWinWidth == 100
+        let g:CenWinWidth = 80
+    else
+        let g:CenWinWidth = 100
     endif
 endfunc
 
