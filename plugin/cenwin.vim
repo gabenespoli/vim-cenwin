@@ -118,7 +118,7 @@ function! CenWinEnable(...)
         vnew
         let g:CenWinLeftPad = bufnr('%') 
         set nobuflisted
-        setlocal statusline=%(%)
+        setlocal statusline=%#StatusLineFill#%(%)%*
     else
         vsplit
         exe "buffer".g:CenWinLeftPad
@@ -136,7 +136,7 @@ function! CenWinEnable(...)
         vnew
         let g:CenWinRightPad = bufnr('%')
         set nobuflisted
-        setlocal statusline=%(%)
+        setlocal statusline=%#StatusLineFill#%(%)%*
     else
         vsplit
         exe "buffer".g:CenWinRightPad
