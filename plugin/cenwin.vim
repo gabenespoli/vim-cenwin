@@ -126,6 +126,7 @@ function! CenWinEnable(...)
     set nonumber norelativenumber
     set nocursorline
     hi NonText ctermfg=8
+    hi VertSplit ctermfg=8
     exe "vertical resize ".g:CenWinLeftWidth
     exe "normal! \<C-w>l"
 
@@ -143,6 +144,7 @@ function! CenWinEnable(...)
     set nonumber norelativenumber
     set nocursorline
     hi NonText ctermfg=8
+    hi VertSplit ctermfg=8
     exe "normal! \<C-w>h"
 
     " resize center window, get right pad width
