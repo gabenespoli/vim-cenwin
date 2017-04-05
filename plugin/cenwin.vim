@@ -118,13 +118,14 @@ function! CenWinEnable(...)
         vnew
         let g:CenWinLeftPad = bufnr('%') 
         set nobuflisted
-        setlocal nonumber
         setlocal statusline=%(%)
-        set nocursorline
     else
         vsplit
         exe "buffer".g:CenWinLeftPad
     endif
+    set nonumber norelativenumber
+    set nocursorline
+    hi NonText ctermfg=8
     exe "vertical resize ".g:CenWinLeftWidth
     exe "normal! \<C-w>l"
 
@@ -134,13 +135,14 @@ function! CenWinEnable(...)
         vnew
         let g:CenWinRightPad = bufnr('%')
         set nobuflisted
-        setlocal nonumber
         setlocal statusline=%(%)
-        set nocursorline
     else
         vsplit
         exe "buffer".g:CenWinRightPad
     endif
+    set nonumber norelativenumber
+    set nocursorline
+    hi NonText ctermfg=8
     exe "normal! \<C-w>h"
 
     " resize center window, get right pad width
@@ -175,6 +177,8 @@ function! CenWinOutlineEnable(...)
             let g:CenWinOutlineExpr = '^function! '
         elseif g:CenWinFiletype == 'matlab'
             let g:CenWinOutlineExpr = '^function '
+        elseif g:CenWinFiletype == 'python'
+            let g:CenWinOutlineExpr = '^def'
         endif
         let g:CenWinOutline = 1
     else " double comment mark search expr
@@ -219,8 +223,14 @@ function! CenWinOutlineEnable(...)
     set modifiable
     silent %s/\v^([^|]*\|){2,2} //e
     if g:CenWinFiletype == 'markdown' || g:CenWinFiletype == 'pandoc'
-        silent %s/#\ //g
-        silent %s/#/\ \ /g
+        "silent %s/#\ //g
+        silent %s/^#/\ \ /g
+        silent %s/^#/\ \ /g
+        silent %s/^#/\ \ /g
+        silent %s/^#/\ \ /g
+        silent %s/^#/\ \ /g
+        silent %s/^#/\ \ /g
+        silent %s/^\ //g
         syn match CenWinOutlineHeader1 /^\S.*\n/
         syn match CenWinOutlineHeader2 /^\s\s\S.*\n/
         syn match CenWinOutlineHeader3 /^\s\s\s\s\S.*\n/
