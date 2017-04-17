@@ -45,24 +45,23 @@ function! CenWinToggle(...)
 endfunc
 
 function! CenWinEnable(...)
-    if a:0 == 0
-        if !exists("b:cenwin_width") || b:cenwin_width == 0
-            if &filetype == 'pandoc' || &filetype == 'markdown'
-                let b:cenwin_width = 100
-            else
-                let b:cenwin_width = 80
-            endif
-        endif
-    else
-        if a:1 != 0
-            let b:cenwin_width = a:1
-            let b:cenwin_left_width = (winwidth('%') - b:cenwin_width) / 2
+    " defaults
+    if !exists("b:cenwin_width") || b:cenwin_width == 0
+        if &filetype == 'pandoc' || &filetype == 'markdown'
+            let b:cenwin_width = 100
+        else
+            let b:cenwin_width = 80
         endif
     endif
+
+    " get input
+    if a:0 > 0 && a:1 > 0
+        let b:cenwin_width = a:1
+    endif
+
+    " calculate left pad width
     "TODO round leftpadwidth to avoid decimals
-    if !exists("b:cenwin_left_width") || b:cenwin_left_width == 0
-        let b:cenwin_left_width = (winwidth('%') - b:cenwin_width) / 2
-    endif
+    let b:cenwin_left_width = (winwidth('%') - b:cenwin_width) / 2
 
     exe "normal! \<C-w>o"
     let currentsplitrightvalue = &splitright
