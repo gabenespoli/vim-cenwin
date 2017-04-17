@@ -107,7 +107,8 @@ function! CenWinEnable(...)
     exe "vert resize ".b:cenwin_width
     let b:cenwin_status = 1
     exe "normal! \<C-w>l"
-    let b:cenwin_right_width = winwidth('%')
+    let s:right_width = winwidth('%')
+    let b:cenwin_right_width = s:right_width
     exe "normal! \<C-w>h"
 
     " reset splitright value
