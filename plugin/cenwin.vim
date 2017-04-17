@@ -69,7 +69,7 @@ function! CenWinEnable(...)
     " add left side pad pane and move focus back to center
     " save buffer-specific left pad width before switching to pad buffer
     set nosplitright
-    let left_width = b:cenwin_left_width
+    let s:left_width = b:cenwin_left_width
     if g:cenwin_left_pad == 0
         vnew
         let g:cenwin_left_pad = bufnr('%') 
@@ -83,7 +83,7 @@ function! CenWinEnable(...)
     set nocursorline
     hi NonText ctermfg=8
     hi VertSplit ctermbg=8
-    exe "vertical resize ".left_width
+    exe "vertical resize ".s:left_width
     exe "normal! \<C-w>l"
 
     " add right side pad pane and move focus back to center
