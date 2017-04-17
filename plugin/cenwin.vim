@@ -63,13 +63,17 @@ function! CenWinEnable(...)
     "TODO round leftpadwidth to avoid decimals
     let b:cenwin_left_width = (winwidth('%') - b:cenwin_width) / 2
 
+    " make sure only current window
     exe "normal! \<C-w>o"
+
+    " save user's split setting to reset it later
     let currentsplitrightvalue = &splitright
+    set nosplitright
+
+    " save buffer-specific left pad width before switching to pad buffer
+    let s:left_width = b:cenwin_left_width
 
     " add left side pad pane and move focus back to center
-    " save buffer-specific left pad width before switching to pad buffer
-    set nosplitright
-    let s:left_width = b:cenwin_left_width
     if g:cenwin_left_pad == 0
         vnew
         let g:cenwin_left_pad = bufnr('%') 
@@ -79,8 +83,7 @@ function! CenWinEnable(...)
         vsplit
         exe "buffer".g:cenwin_left_pad
     endif
-    set nonumber norelativenumber
-    set nocursorline
+    set nonumber norelativenumber nocursorline
     hi NonText ctermfg=8
     hi VertSplit ctermbg=8
     exe "vertical resize ".s:left_width
@@ -97,8 +100,7 @@ function! CenWinEnable(...)
         vsplit
         exe "buffer".g:cenwin_right_pad
     endif
-    set nonumber norelativenumber
-    set nocursorline
+    set nonumber norelativenumber nocursorline
     hi NonText ctermfg=8
     hi VertSplit ctermbg=8
     exe "normal! \<C-w>h"
@@ -111,7 +113,7 @@ function! CenWinEnable(...)
     let b:cenwin_right_width = s:right_width
     exe "normal! \<C-w>h"
 
-    " reset splitright value
+    " reset user's split value
     let &splitright=currentsplitrightvalue
 endfunc
 
