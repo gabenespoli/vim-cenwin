@@ -2,8 +2,7 @@
 "
 " Vim plugin to center the current window by adding a vertical split on either
 " side. Can then display the location list (with functions or headings) and 
-" quickfix window (with todos present throughout the file) in those panes.
-"
+" quickfix window (with todos present throughout the file) in those panes.  "
 " center the pane by creating two empty panes on either side
 " first arg is width of centered window (default 80)
 " second arg is the width of the left-hand pad 
@@ -20,13 +19,13 @@
 "to the corresponding line. i hate when it always starts at the top
 "TODO keep sidebars updated as the cenwin buffer changes
 
-" defaults
-let g:CenWinStatus = 0 " buffer number of the centered window
-let g:CenWinLeftPad = 0 " buffer number of pad so it can be reused
-let g:CenWinRightPad = 0
-let g:CenWinWidth = 100
-let g:CenWinLeftWidth = 0
-let g:CenWinRightWidth = 0
+" variables (and some defaults)
+"let b:CenWinStatus = 0 " buffer number of the centered window
+let g:cenwin_left_pad = 0 " buffer number of pad so it can be reused
+let g:cenwin_right_pad = 0
+"let b:cenwin_width = 100
+"let b:cenwin_left_width = 0
+"let g:CenWinRightWidth = 0
 let g:CenWinOutline = 0 " boolean
 let g:CenWinOutlineType = 1 " 1 = functions; 2 = double comment char
 let g:CenWinTodo = 0 " boolean
@@ -38,18 +37,113 @@ function! CenWinToggle(...)
     else
         let opt = a:1
     endif
-    if g:CenWinStatus == 0
+    if !exists("b:cenwin_status") || b:cenwin_status == 0
         call CenWinEnable(opt)
     else
         call CenWinDisable(opt)
     endif
 endfunc
 
-function! CenWinToggleWidth()
-    if g:CenWinWidth == 100
-        let g:CenWinWidth = 80
+function! CenWinEnable(...)
+    if a:0 == 0
+        if !exists("b:cenwin_width") || b:cenwin_width == 0
+            if &filetype == 'pandoc' || &filetype == 'markdown'
+                let b:cenwin_width = 100
+            else
+                let b:cenwin_width = 80
+            endif
+        endif
     else
-        let g:CenWinWidth = 100
+        if a:1 != 0
+            let b:cenwin_width = a:1
+            let b:cenwin_left_width = (winwidth('%') - b:cenwin_width) / 2
+        endif
+    endif
+    "TODO round leftpadwidth to avoid decimals
+    if !exists("b:cenwin_left_width") || b:cenwin_left_width == 0
+        let b:cenwin_left_width = (winwidth('%') - b:cenwin_width) / 2
+    endif
+
+    exe "normal! \<C-w>o"
+    let currentsplitrightvalue = &splitright
+
+    " add left side pad pane and move focus back to center
+    set nosplitright
+    if g:cenwin_left_pad == 0
+        vnew
+        let g:cenwin_left_pad = bufnr('%') 
+        set nobuflisted
+        setlocal statusline=%#StatusLineFill#%=%*
+    else
+        vsplit
+        exe "buffer".g:cenwin_left_pad
+    endif
+    set nonumber norelativenumber
+    set nocursorline
+    hi NonText ctermfg=8
+    hi VertSplit ctermbg=8
+    exe "vertical resize ".b:cenwin_left_width
+    exe "normal! \<C-w>l"
+
+    " add right side pad pane and move focus back to center
+    set splitright
+    if g:cenwin_right_pad == 0
+        vnew
+        let g:cenwin_right_pad = bufnr('%')
+        set nobuflisted
+        setlocal statusline=%#StatusLineFill#%=%*
+    else
+        vsplit
+        exe "buffer".g:cenwin_right_pad
+    endif
+    set nonumber norelativenumber
+    set nocursorline
+    hi NonText ctermfg=8
+    hi VertSplit ctermbg=8
+    exe "normal! \<C-w>h"
+
+    " resize center window, get right pad width
+    exe "vert resize ".b:cenwin_width
+    let b:cenwin_status = 1
+    exe "normal! \<C-w>l"
+    let b:cenwin_right_width = winwidth('%')
+    exe "normal! \<C-w>h"
+
+    " reset splitright value
+    let &splitright=currentsplitrightvalue
+endfunc
+
+function! CenWinDisable(...)
+    " enter 0 to disable if b:cenwin_status is non-zero
+    " enter 1 to force disable it
+    let do=0
+    if a:0 > 0 && a:1 != 0
+        let do = 1
+    endif
+    if exists("b:cenwin_status") && b:cenwin_status != 0
+        let do = 1
+    endif
+
+    " get current buffer (the one in the cenwin)
+    " save current switchbuf setting and add useopen to it
+    " switch to left and right pads and close them
+    " switch back to cenwinstatus
+
+    if do == 1
+        " move to cenwin buffer if we are in a sidebar
+        if exists("b:cenwin_associated_buffer")
+            exe "buffer".b:cenwin_associated_buffer")
+        endif
+        exe "normal! \<C-w>o"
+        let b:cenwin_status = 0
+    endif
+endfunc
+
+function! CenWinToggleWidth()
+    if b:cenwin_width == 100
+        let b:cenwin_width = 80
+    else
+        let b:cenwin_width = 100
     endif
 endfunc
 
@@ -93,76 +187,11 @@ function! CenWinTodoToggle(...)
     endif
 endfunc
 
-function! CenWinEnable(...)
-    if a:0 == 0
-        if g:CenWinWidth == 0
-            let g:CenWinWidth = 80
-        endif
-    else
-        if a:1 != 0
-            let g:CenWinWidth = a:1
-            let g:CenWinLeftWidth = (winwidth('%') - g:CenWinWidth) / 2
-        endif
-    endif
-    "TODO round leftpadwidth to avoid decimals
-    if g:CenWinLeftWidth == 0
-        let g:CenWinLeftWidth = (winwidth('%') - g:CenWinWidth) / 2
-    endif
-
-    exe "normal! \<C-w>o"
-    let currentsplitrightvalue = &splitright
-
-    " add left side pad pane and move focus back to center
-    set nosplitright
-    if g:CenWinLeftPad == 0
-        vnew
-        let g:CenWinLeftPad = bufnr('%') 
-        set nobuflisted
-        setlocal statusline=%#StatusLineFill#%=%*
-    else
-        vsplit
-        exe "buffer".g:CenWinLeftPad
-    endif
-    set nonumber norelativenumber
-    set nocursorline
-    hi NonText ctermfg=8
-    hi VertSplit ctermbg=8
-    exe "vertical resize ".g:CenWinLeftWidth
-    exe "normal! \<C-w>l"
-
-    " add right side pad pane and move focus back to center
-    set splitright
-    if g:CenWinRightPad == 0
-        vnew
-        let g:CenWinRightPad = bufnr('%')
-        set nobuflisted
-        setlocal statusline=%#StatusLineFill#%=%*
-    else
-        vsplit
-        exe "buffer".g:CenWinRightPad
-    endif
-    set nonumber norelativenumber
-    set nocursorline
-    hi NonText ctermfg=8
-    hi VertSplit ctermbg=8
-    exe "normal! \<C-w>h"
-
-    " resize center window, get right pad width
-    exe "vert resize ".g:CenWinWidth
-    let g:CenWinStatus = bufnr('%')
-    exe "normal! \<C-w>l"
-    let g:CenWinRightWidth = winwidth('%')
-    exe "normal! \<C-w>h"
-
-    " reset splitright value
-    let &splitright=currentsplitrightvalue
-endfunc
-
 function! CenWinOutlineEnable(...)
     " first input arg (width of window)
     if (a:0 == 0) || (a:1 == 0) " default or already-set width
-        if g:CenWinLeftWidth != 0
-            let l:tocWidth = g:CenWinLeftWidth
+        if b:cenwin_left_width != 0
+            let l:tocWidth = b:cenwin_left_width
         else
             let l:tocWidth = winwidth('%') / 4
         endif
@@ -198,8 +227,8 @@ function! CenWinOutlineEnable(...)
 
 "    if a:0 != 0
 "        let l:tocWidth = a:1
-"    elseif g:CenWinLeftWidth != 0
-"        let l:tocWidth = g:CenWinLeftWidth
+"    elseif b:cenwin_left_width != 0
+"        let l:tocWidth = b:cenwin_left_width
 "    else
 "        let l:tocWidth = winwidth('%') / 4
 "    endif
@@ -268,7 +297,7 @@ function! CenWinOutlineEnable(...)
     " resize center window if needed
     if g:CenWinStatus != 0
         exe "normal! \<C-w>l"
-        exe "vertical resize " . g:CenWinWidth
+        exe "vertical resize " . b:cenwin_width
         exe "normal! \<C-w>h"
     endif
 
@@ -349,9 +378,9 @@ function! CenWinTodoEnable(...)
         " resize splits if needed
         if g:CenWinStatus != 0
             exe "normal! \<C-w>h\<C-w>h"
-            exe "vertical resize " . g:CenWinLeftWidth
+            exe "vertical resize " . b:cenwin_left_width
             exe "normal! \<C-w>l"
-            exe "vertical resize " . g:CenWinWidth
+            exe "vertical resize " . b:cenwin_width
             exe "normal! \<C-w>l"
         endif
 
@@ -396,36 +425,12 @@ function! CenWinTodoAdd()
     exe 'normal! 0i' . g:CenWinTodoExpr
 endfunc
 
-function! CenWinDisable(...)
-    " enter 0 to disable if g:CenWinStatus is non-zero
-    " enter 1 to force disable it
-    let do=0
-    if a:0 > 0 && a:1 != 0
-        let do = 1
-    endif
-    if g:CenWinStatus != 0
-        let do = 1
-    endif
-
-    " get current buffer (the one in the cenwin)
-    " save current switchbuf setting and add useopen to it
-    " switch to left and right pads and close them
-    " switch back to cenwinstatus
-
-
-    if do == 1
-        exe "buffer".g:CenWinStatus
-        exe "normal! \<C-w>o"
-        let g:CenWinStatus = 0
-    endif
-endfunc
-
 function! CenWinOutlineDisable()
     exe "normal! \<C-w>h\<C-w>h"
     if g:CenWinStatus == 0
         exe "close"
     else
-        exe "buffer".g:CenWinLeftPad
+        exe "buffer".g:cenwin_left_pad
         exe "normal! \<C-w>l"
     endif
     let g:CenWinOutline = 0
@@ -436,7 +441,7 @@ function! CenWinTodoDisable()
         cclose
     else
         exe "normal! \<C-w>l\<C-w>l"
-        exe "buffer".g:CenWinRightPad
+        exe "buffer".g:cenwin_right_pad
         exe "normal! \<C-w>h"
     endif
     let g:CenWinTodo = 0
