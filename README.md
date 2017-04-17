@@ -2,7 +2,7 @@
 
 This is a vim plugin to center the current file in the terminal window by adding a blank pane on either side. These panes can then be populated with a document outline (using markdown headings, function headings, or lines with a double comment character (e.g., ##, %%, or "")) or todos placed throughout the file (e.g., TODO, #TODO, # TODO, etc.). These functions use the location list and quickfix window, respectively. 
 
-This is my first vim plugin and is still very much in development.
+This is my first vim plugin and is still very much in development. This readme is out of date. Currently only the centering of the window works; the location list and quickfix list things are still being worked on.
 
 ## suggested keybindings
 
